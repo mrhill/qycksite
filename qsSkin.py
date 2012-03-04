@@ -38,14 +38,6 @@ class qsSkin:
         self.parts['a:visited'] = { 'color': '#909' }
         self.parts['a:hover,a:active'] = { 'color': '#E20' }
 
-        self.parts['.text'] = {
-            'font-size': '12px',
-            'color': '#000',
-        }
-        self.parts['.box'] = {
-            'border': '1px solid #DDD'
-        }
-
     def css(self, partName):
         str = u''
         if partName in self.parts:

@@ -48,7 +48,11 @@ if __name__ == "__main__":
     layoutCol.addColumn(mainText, 410)
     layoutCol.addColumn(qsBox(id="right1", body="right 1"), width=60, alignRight=True)
     layoutCol.addColumn(qsBox(id="right2", body="right 2"), width=128, alignRight=True)
-    layoutCol.setBorder('1px solid black')
+
+    layout2Col = qsLayout2ColLeftMenu()
+    layout2Col.setSidebar(sidebar, 160)
+    layout2Col.setMain(qsBox(id="main2", title="Title", body="sekfjlksefnklweklf"))
 
     page.root.addLayout(layoutCol)
+    page.root.addLayout(layout2Col)
     print page.html()
