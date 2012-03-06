@@ -1,10 +1,15 @@
 #!/usr/bin/python
 
 def qsRenderCssElement(style):
-    str = u''
+    s = u''
     for i in style:
-        str += "%s:%s;" % (i, style[i])
-    return str
+        v=style[i]
+        print type(v)
+        if type(v)==str or type(v)==unicode:
+            s += "%s:%s;" % (i, v)
+        else:
+            s += v.css()
+    return s
 
 def qsRenderCss(styleDict):
     str = u''
@@ -20,6 +25,37 @@ def parsePx(str):
     if 'px' not in str:
         raise RuntimeError('only px width supported')
     return int(str[:i].rsplit(None,1)[-1])
+
+def parseRgb(s):
+    s = s.strip()
+    if s[0]=='#':
+        if len(s)==4: return (int(s[1],16)<<4, int(s[2],16)<<4, int(s[3],16)<<4)
+        return (int(s[1:3],16), int(s[3:5],16), int(s[5:7],16))
+    s = s[s.index('(')+1:s.index(')')]
+    s = s.split(',')
+    return (int(s[0]),int(s[1]),int(s[2]))
+
+class qsGradient:
+    def __init__(self, rgbStart=None, rgbEnd=None):
+        self.rgb=[]
+        if rgbStart: self.rgb.append(rgbStart)
+        if rgbEnd: self.rgb.append(rgbEnd)
+    def addStop(self, idx, rgb):
+        self.rgb.insert(idx, rgb)
+    def css(self):
+        str = u'background: %s;' % self.rgb[0][1]
+        for d in ['background: -moz-linear-gradient(top,','background: -webkit-gradient(linear,left top,left bottom,','background: -webkit-linear-gradient(top,','background: -o-linear-gradient(top,','background: -ms-linear-gradient(top,','background: linear-gradient(top,']:
+            str+=d
+            l=[]
+            for i in self.rgb:
+                rgb=parseRgb(i[1])
+                if '-webkit-gradient' in d:
+                    l.append('color-stop(%d%%,rgba(%d,%d,%d,%.1f))'%(i[0],rgb[0],rgb[1],rgb[2],i[2]))
+                else:
+                    l.append('rgba(%d,%d,%d,%.1f) %d%%'%(rgb[0],rgb[1],rgb[2],i[2],i[0]))
+            str+=','.join(l)
+            str+=');'
+        return str
 
 class qsElement:
     style = dict()
@@ -84,7 +120,8 @@ class qsBox(qsElement):
         #'.qsBox': '',
         '.qsBox-title': {
             'color': '#777',
-            'background': 'url(boxtopbg.gif) repeat-x left top',
+            #'background': 'url(boxtopbg.gif) repeat-x left top',
+            'gradient': qsGradient((0,'#CCC',1.0),(100,'#FFF',1.0)),
             'padding': '3px',
             'font-size': '12px',
             'font-weight': 'bold',
@@ -123,3 +160,7 @@ class qsSidebar(qsElement):
             str+=s.html()
         str+=self.htmlClose()
         return str
+
+if __name__ == "__main__":
+    g = qsGradient((0, '#111', 1.0), (100,'#FFEEAA',1.0))
+    print g.css()
